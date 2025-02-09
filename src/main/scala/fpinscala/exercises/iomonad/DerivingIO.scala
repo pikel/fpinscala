@@ -4,13 +4,12 @@ import scala.io.StdIn.readLine
 import scala.util.Try
 
 object IO0:
-                            /*
-
+  /*
   Our first attempt at data type for representing computations that
   may perform I/O. Has a simple 'interpreter' baked in--the `run`
   function, which just returns `Unit`.
+  */
 
-                             */
   trait IO:
     self =>
     def unsafeRun: Unit
@@ -23,14 +22,12 @@ object IO0:
     def empty: IO = new:
       def unsafeRun = ()
 
-                            /*
-
+  /*
   The API of this `IO` type isn't very useful.  Not many operations
   (it is only a monoid), and not many laws to help with reasoning. It
   is completely _opaque_. Also cannot represent _input_ effects, like
   reading from console, for instance:
-
-                             */
+  */
 
   def fahrenheitToCelsius(f: Double): Double =
     (f - 32) * 5.0/9.0
@@ -51,7 +48,6 @@ end IO0
 
 object IO1:
                             /*
-
   We need a way for our `IO` actions to yield a result of some
   meaningful type. We do this by adding a type parameter to `IO`,
   which now forms a `Monad`.
@@ -92,7 +88,7 @@ object IO1:
     _ <- PrintLine(fahrenheitToCelsius(d).toString)
   yield ()
 
-  /*                         Some other examples                      */
+  /* Some other examples */
 
   // An `IO[Unit]` that reads a line from the console and echoes it back.
   val echo = ReadLine.flatMap(PrintLine)
@@ -112,22 +108,21 @@ object IO1:
   // return the list of results.
   val lines: IO[List[String]] = ReadLine.replicateM(10)
 
-                            /*
+ /*
+  * Larger example using various monadic combinators. Sample run:
+  *   The Amazing Factorial REPL, v2.0
+  *   q - quit
+  *   <number> - compute the factorial of the given number
+  *   <anything else> - bomb with horrible error
+  *   3
+  *   factorial: 6
+  *   7
+  *   factorial: 5040
+  *   q
+  */
 
-  Larger example using various monadic combinators. Sample run:
-
-     The Amazing Factorial REPL, v2.0
-     q - quit
-     <number> - compute the factorial of the given number
-     <anything else> - bomb with horrible error
-     3
-     factorial: 6
-     7
-     factorial: 5040
-     q
-
-                             */
-  val helpstring = """
+  val helpstring = 
+  """
   | The Amazing Factorial REPL, v2.0
   | q - quit
   | <number> - compute the factorial of the given number
@@ -135,7 +130,7 @@ object IO1:
   """.trim.stripMargin
 
   // import all the combinators that come from `Monad`
-  import IO.monad.* 
+  import IO.monad.*
 
   def factorial(n: Int): IO[Int] =
     for
@@ -163,7 +158,6 @@ object IO2a:
   The problem is that `run` call itself recursively, which means that
   an infinite or long running IO computation will have a chain of regular
   calls to `run`, eventually overflowing the stack.
-
   The general solution is to make the `IO` type into a data type that we
   interpret using a tail recursive loop, using pattern matching.
   */
@@ -182,6 +176,7 @@ object IO2a:
     // tail-recursive function, the one tricky case is left-nested
     // flatMaps, as in `a.flatMap(f).flatMap(g)`, which we
     // reassociate to the right as `a.flatMap(ar => f(a).flatMap(g))`
+
     @annotation.tailrec final def unsafeRun(): A = this match
       case Return(a) => a
       case Suspend(r) => r()

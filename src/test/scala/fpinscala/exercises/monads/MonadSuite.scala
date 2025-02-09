@@ -186,7 +186,7 @@ class MonadSuite extends PropSuite:
 
   private def assertAssociativeLaw[F[_]](tm: TestedMonad[F[_]], intList: List[Int]): Unit =
     import tm.*
-    val fa = pure(intList)
+    val fa  = pure(intList)
     val fc1 = monad.flatMap(monad.flatMap(fa)(f))(g)
     val fc2 = monad.flatMap(fa)(a => monad.flatMap(f(a))(g))
     assertFs(fc1, fc2)
@@ -213,51 +213,50 @@ object MonadSuite extends Assertions:
     def pure[A]: A => F[A]
     def assertFs[A](actual: F[A], expected: F[A]): Unit =
       Assertions.assertEquals(actual, expected)
-    def f: List[Int] => F[Int] = list => pure(list.sum)
-    def g: Int => F[String] = i => pure(i.toString)
+    def f: List[Int] => F[Int]  = list => pure(list.sum)
+    def g: Int => F[String]     = i => pure(i.toString)
     def h: String => F[Boolean] = s => pure(s.startsWith("-"))
 
   private def genMonad(rng: RNG): TestedMonad[Gen[_]] =
     new TestedMonad[Gen]:
-      val monad: Monad[Gen] = Monad.genMonad
-      def pure[A]: A => Gen[A] = Gen.unit
+      val monad: Monad[Gen]                                            = Monad.genMonad
+      def pure[A]: A => Gen[A]                                         = Gen.unit
       override def assertFs[A](actual: Gen[A], expected: Gen[A]): Unit = ???
-        // ToDo: Uncomment after fpinscala.exercises.testing.GenSuite passing
-        // Assertions.assertEquals(actual.next(rng)._1, expected.next(rng)._1)
-
+      // ToDo: Uncomment after fpinscala.exercises.testing.GenSuite passing
+      // Assertions.assertEquals(actual.next(rng)._1, expected.next(rng)._1)
 
   private val parMonad: TestedMonad[Par[_]] =
     new TestedMonad[Par]:
-      val monad: Monad[Par] = Monad.parMonad
+      val monad: Monad[Par]    = Monad.parMonad
       def pure[A]: A => Par[A] = Par.unit
       override def assertFs[A](actual: Par[A], expected: Par[A]): Unit =
         Assertions.assertEquals(actual.run(service).get(), expected.run(service).get())
 
   private def parserMonad(s: String): TestedMonad[Parser[_]] =
     new TestedMonad[Parser]:
-      val monad: Monad[Parser] = Monad.parserMonad(UnitTestParser)
+      val monad: Monad[Parser]    = Monad.parserMonad(UnitTestParser)
       def pure[A]: A => Parser[A] = succeed
       override def assertFs[A](actual: Parser[A], expected: Parser[A]): Unit =
         Assertions.assertEquals(actual.run(s), expected.run(s))
 
   private val optionMonad: TestedMonad[Option[_]] =
     new TestedMonad[Option]:
-      val monad: Monad[Option] = Monad.optionMonad
+      val monad: Monad[Option]    = Monad.optionMonad
       def pure[A]: A => Option[A] = Some.apply
 
   private val lazyListMonad: TestedMonad[LazyList[_]] =
     new TestedMonad[LazyList]:
-      val monad: Monad[LazyList] = Monad.lazyListMonad
+      val monad: Monad[LazyList]    = Monad.lazyListMonad
       def pure[A]: A => LazyList[A] = a => LazyList(a)
 
   private val listMonad: TestedMonad[List[_]] =
     new TestedMonad[List]:
-      val monad: Monad[List] = Monad.listMonad
+      val monad: Monad[List]    = Monad.listMonad
       def pure[A]: A => List[A] = a => List(a)
 
   private val idMonad: TestedMonad[Id[_]] =
     new TestedMonad[Id]:
-      val monad: Monad[Id] = Id.idMonad
+      val monad: Monad[Id]    = Id.idMonad
       def pure[A]: A => Id[A] = a => Id(a)
 
   private val readerMonad: TestedMonad[Reader[Unit, _]] =

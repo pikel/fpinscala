@@ -16,46 +16,61 @@ object Monoid:
     def combine(a1: List[A], a2: List[A]) = a1 ++ a2
     val empty = Nil
 
-  lazy val intAddition: Monoid[Int] = ???
+  lazy val intAddition: Monoid[Int] = new:
+    def combine(i1: Int, i2: Int) = i1 + i2
+    def empty: Int = 0
 
-  lazy val intMultiplication: Monoid[Int] = ???
+  lazy val intMultiplication: Monoid[Int] = new:
+    def combine(i1: Int, i2: Int) = i1 * i2
+    def empty: Int = 1
 
-  lazy val booleanOr: Monoid[Boolean] = ???
+  lazy val booleanOr: Monoid[Boolean] = new:
+    def combine(b1: Boolean, b2: Boolean) = b1 || b2
+    def empty: Boolean = false
 
-  lazy val booleanAnd: Monoid[Boolean] = ???
+  lazy val booleanAnd: Monoid[Boolean] = new:
+    def combine(b1: Boolean, b2: Boolean) = b1 && b2
+    def empty: Boolean = true
 
-  def optionMonoid[A]: Monoid[Option[A]] = ???
+  def optionMonoid[A]: Monoid[Option[A]] = new:
+    def combine(o1: Option[A], o2: Option[A]) = o1.orElse(o2)
+    def empty: Option[A] = None
 
   def dual[A](m: Monoid[A]): Monoid[A] = new:
     def combine(x: A, y: A): A = m.combine(y, x)
     val empty = m.empty
 
-  def endoMonoid[A]: Monoid[A => A] = ???
+  def endoMonoid[A]: Monoid[A => A] = new:
+    def combine(f1: A => A, f2: A => A): A => A = f1 andThen f2
+    def empty: A => A = identity
 
   import fpinscala.exercises.testing.{Prop, Gen}
   // import Gen.`**`
 
-  def monoidLaws[A](m: Monoid[A], gen: Gen[A]): Prop = ???
+  def monoidLaws[A](m: Monoid[A], gen: Gen[A]): Prop =
+    Prop.forAll(gen) { a =>
+      m.combine(a, m.empty) == m.combine(m.empty, a)
+    }
 
   def combineAll[A](as: List[A], m: Monoid[A]): A =
-    ???
+    as.foldLeft(m.empty)(m.combine)
 
   def foldMap[A, B](as: List[A], m: Monoid[B])(f: A => B): B =
-    ???
+    as.foldLeft(m.empty)((b, a) => m.combine(b, f(a)))
 
   def foldRight[A, B](as: List[A])(acc: B)(f: (A, B) => B): B =
-    ???
+    foldMap(as, dual(endoMonoid[B]))(f.curried)(acc)
 
   def foldLeft[A, B](as: List[A])(acc: B)(f: (B, A) => B): B =
-    ???
+    foldMap(as, endoMonoid[B])(a => b => f(b, a))(acc)
 
   def foldMapV[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): B =
     ???
 
-  def par[A](m: Monoid[A]): Monoid[Par[A]] = 
+  def par[A](m: Monoid[A]): Monoid[Par[A]] =
     ???
 
-  def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = 
+  def parFoldMap[A, B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
     ???
 
   def ordered(ints: IndexedSeq[Int]): Boolean =
@@ -69,7 +84,8 @@ object Monoid:
 
   def count(s: String): Int = ???
 
-  given productMonoid[A, B](using ma: Monoid[A], mb: Monoid[B]): Monoid[(A, B)] with
+  given productMonoid[A, B](using ma: Monoid[A], mb: Monoid[B]): Monoid[(A, B)]
+    with
     def combine(x: (A, B), y: (A, B)) = ???
     val empty = ???
 

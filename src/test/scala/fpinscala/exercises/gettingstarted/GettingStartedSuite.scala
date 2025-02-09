@@ -8,9 +8,11 @@ import fpinscala.exercises.gettingstarted.MyProgram.{factorial, fib}
 import fpinscala.exercises.gettingstarted.PolymorphicFunctions.{compose, curry, isSorted, uncurry}
 
 class GettingStartedSuite extends PropSuite:
-  private lazy val mulCurry: Int => Int => Int = curry[Int, Int, Int]((a: Int, b: Int) => a * b)
+  private lazy val mulCurry: Int => Int => Int =
+    curry[Int, Int, Int]((a: Int, b: Int) => a * b)
 
-  private lazy val mulUncurry: (Int, Int) => Int = uncurry[Int, Int, Int]((a: Int) => (b: Int) => a * b)
+  private lazy val mulUncurry: (Int, Int) => Int =
+    uncurry[Int, Int, Int]((a: Int) => (b: Int) => a * b)
 
   private val genSortedArray: Gen[Array[Int]] =
     genList(genShortNumber).map(_.sorted.toArray)

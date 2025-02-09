@@ -21,27 +21,26 @@ object Nonblocking:
     def fork[A](a: => Par[A]): Par[A] =
       es => cb => eval(es)(a(es)(cb))
 
-    /**
-     * Helper function for constructing `Par` values out of calls to non-blocking continuation-passing-style APIs.
-     * This will come in handy in Chapter 13.
-     */
-    def async[A](f: (A => Unit) => Unit): Par[A] = 
+    /** Helper function for constructing `Par` values out of calls to non-blocking continuation-passing-style APIs. This
+      * will come in handy in Chapter 13.
+      */
+    def async[A](f: (A => Unit) => Unit): Par[A] =
       es => cb => f(cb)
 
-    /**
-     * Helper function, for evaluating an action
-     * asynchronously, using the given `ExecutorService`.
-     */
+    /** Helper function, for evaluating an action asynchronously, using the given `ExecutorService`.
+      */
     def eval(es: ExecutorService)(r: => Unit): Unit =
       es.submit(new Callable[Unit] { def call = r })
 
     extension [A](p: Par[A])
       def run(es: ExecutorService): A =
-        val ref = new AtomicReference[A] // A mutable, threadsafe reference, to use for storing the result
-        val latch = new CountDownLatch(1) // A latch which, when decremented, implies that `ref` has the result
-        p(es) { a => ref.set(a); latch.countDown } // Asynchronously set the result, and decrement the latch
+        val ref   = new AtomicReference[A] // A mutable, threadsafe reference, to use for storing the result
+        val latch = new CountDownLatch(1)  // A latch which, when decremented, implies that `ref` has the result
+        p(es) { a =>
+          ref.set(a); latch.countDown
+        }           // Asynchronously set the result, and decrement the latch
         latch.await // Block until the `latch.countDown` is invoked asynchronously
-        ref.get // Once we've passed the latch, we know `ref` has been set, and return its value
+        ref.get     // Once we've passed the latch, we know `ref` has been set, and return its value
 
       def map2[B, C](p2: Par[B])(f: (A, B) => C): Par[C] =
         es => cb =>
@@ -66,7 +65,7 @@ object Nonblocking:
       def flatMap[B](f: A => Par[B]): Par[B] =
         es => cb => p(es)(a => f(a)(es)(cb))
 
-      def zip[B](b: Par[B]): Par[(A,B)] = map2(b)((_,_))
+      def zip[B](b: Par[B]): Par[(A, B)] = map2(b)((_, _))
 
     def lazyUnit[A](a: => A): Par[A] =
       fork(unit(a))
@@ -76,7 +75,7 @@ object Nonblocking:
 
     def sequenceRight[A](as: List[Par[A]]): Par[List[A]] =
       as match
-        case Nil => unit(Nil)
+        case Nil    => unit(Nil)
         case h :: t => h.map2(fork(sequence(t)))(_ :: _)
 
     def sequenceBalanced[A](as: IndexedSeq[Par[A]]): Par[IndexedSeq[A]] = fork:
@@ -118,7 +117,7 @@ object Nonblocking:
 
     /* The code here is very similar. */
     def choiceN[A](p: Par[Int])(ps: List[Par[A]]): Par[A] =
-      ???
+      es => cb => p(es)(ind => eval(es)(ps(ind % ps.length)(es)(cb)))
 
     def choiceViaChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] =
       ???
@@ -142,5 +141,5 @@ object Nonblocking:
     def joinViaFlatMap[A](a: Par[Par[A]]): Par[A] =
       ???
 
-    def flatMapViaJoin[A,B](p: Par[A])(f: A => Par[B]): Par[B] =
+    def flatMapViaJoin[A, B](p: Par[A])(f: A => Par[B]): Par[B] =
       ???

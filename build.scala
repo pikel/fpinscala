@@ -1,8 +1,9 @@
-//> using scala 3.3.4
+//> using scala 3.6.3
 
 //> using options -feature
 //> using options -deprecation
-//> using options -source:future
-//> using options -Ykind-projector:underscores
+//> using options -source:3.6-migration
+//> using options -Xkind-projector:underscores
+//> using options -rewrite
 
 //> using lib org.scalameta::munit:0.7.29

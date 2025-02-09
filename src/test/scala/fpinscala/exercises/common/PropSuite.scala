@@ -16,19 +16,19 @@ trait PropSuite extends FunSuite:
         f(a)
         true
     val prop = forAll[A](a)(g)
-    test(new TestOptions(name, Set.empty, loc))(prop.check())
+    test(TestOptions(name))(prop.check())
 
   override def munitTestTransforms: List[TestTransform] =
     super.munitTestTransforms :+ scalaCheckPropTransform
 
   private val scalaCheckPropTransform: TestTransform =
-    new TestTransform(
+    TestTransform(
       "FPInScala Prop",
       t =>
         t.withBodyMap(
           _.transformCompat {
             case Success(result: Result @nowarn) => resultToTry(result, t)
-            case r => r
+            case r                               => r
           }(munitExecutionContext)
         )
     )
@@ -36,7 +36,6 @@ trait PropSuite extends FunSuite:
   private def resultToTry(result: Result, test: Test): Try[Unit] =
     result match
       case Passed(status, n) =>
-        println(s"${test.name}: + OK, property ${status.toString.toLowerCase}, ran $n tests.")
         Success(())
       case Falsified(msg) =>
-        Try(fail(msg.string)(test.location))
+        Try(fail("")(test.location))
