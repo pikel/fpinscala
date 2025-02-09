@@ -26,15 +26,14 @@ trait Traverse[F[_]] extends Functor[F], Foldable[F]:
     override def foldLeft[B](acc: B)(f: (B, A) => B): B =
       ???
 
-    override def toList: List[A] =
-      ???
+    override def toList: List[A] = foldLeft(List.empty[A])(_ :+ _)
 
     def mapAccum[S, B](s: S)(f: (A, S) => (B, S)): (F[B], S) =
-      fa.traverse(a => 
+      fa.traverse(a =>
         for
           s1 <- State.get[S]
           (b, s2) = f(a, s1)
-          _  <- State.set(s2)
+          _ <- State.set(s2)
         yield b
       ).run(s)
 
@@ -44,7 +43,10 @@ trait Traverse[F[_]] extends Functor[F], Foldable[F]:
     def reverse: F[A] =
       ???
 
-    def fuse[M[_], N[_], B](f: A => M[B], g: A => N[B])(using m: Applicative[M], n: Applicative[N]): (M[F[B]], N[F[B]]) =
+    def fuse[M[_], N[_], B](f: A => M[B], g: A => N[B])(using
+        m: Applicative[M],
+        n: Applicative[N]
+    ): (M[F[B]], N[F[B]]) =
       ???
 
   def compose[G[_]: Traverse]: Traverse[[x] =>> F[G[x]]] = new:
@@ -55,12 +57,12 @@ trait Traverse[F[_]] extends Functor[F], Foldable[F]:
 case class Tree[+A](head: A, tail: List[Tree[A]])
 
 object Traverse:
-  given listTraverse: Traverse[List] with
+  given listTraverse: Traverse[List]:
     extension [A](as: List[A])
       override def traverse[G[_]: Applicative, B](f: A => G[B]): G[List[B]] =
         ???
 
-  given optionTraverse: Traverse[Option] with
+  given optionTraverse: Traverse[Option]:
     extension [A](oa: Option[A])
       override def traverse[G[_]: Applicative, B](f: A => G[B]): G[Option[B]] =
         ???
@@ -69,8 +71,8 @@ object Traverse:
     extension [A](ta: Tree[A])
       override def traverse[G[_]: Applicative, B](f: A => G[B]): G[Tree[B]] =
         ???
-  
-  given mapTraverse[K]: Traverse[Map[K, _]] with
+
+  given mapTraverse: [K] => Traverse[Map[K, _]]:
     extension [A](m: Map[K, A])
       override def traverse[G[_]: Applicative, B](f: A => G[B]): G[Map[K, B]] =
         ???

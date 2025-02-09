@@ -12,12 +12,12 @@ import scala.util.Try
 import scala.{List as SList, Nil as SNil}
 
 class ListSuite extends PropSuite:
-  private val genIntList: Gen[List[Int]] = genIntSList.map(scalaListToList)
+  private val genIntList: Gen[List[Int]]       = genIntSList.map(scalaListToList)
   private val genDoubleList: Gen[List[Double]] = genDoubleSList.map(scalaListToList)
   private val genListOfLists: Gen[List[List[Int]]] =
     for
       length <- genShortNumber
-      slist <- Gen.listOfN(length, genIntList)
+      slist  <- Gen.listOfN(length, genIntList)
     yield scalaListToList(slist)
 
   private val genSmallNum: Gen[Int] = Gen.choose(-10, 10)
@@ -47,7 +47,7 @@ class ListSuite extends PropSuite:
     assertEquals(List.length(list), listToScalaList(list).length)
 
   test("List.foldLeft")(genIntList): list =>
-    assertEquals(List.foldLeft(list, "", _ + _.toString), listToScalaList(list).foldLeft("")(_ + _.toString))
+    assertEquals(List.foldLeft(list, "")(_ + _.toString), listToScalaList(list).foldLeft("")(_ + _.toString))
 
   test("List.sumViaFoldLeft")(genIntList): list =>
     assertEquals(List.sumViaFoldLeft(list), listToScalaList(list).sum)
@@ -88,25 +88,25 @@ class ListSuite extends PropSuite:
 
   test("List.map")(genIntList): list =>
     assertEquals(
-      List.map(list, _ * 2),
+      List.map(list)(_ * 2),
       scalaListToList(listToScalaList(list).map(_ * 2))
     )
 
   test("List.filter")(genIntList): list =>
     assertEquals(
-      List.filter(list, _ % 2 == 0),
+      List.filter(list)(_ % 2 == 0),
       scalaListToList(listToScalaList(list).filter(_ % 2 == 0))
     )
 
   test("List.flatMap")(genIntList): list =>
     assertEquals(
-      List.flatMap(list, a => List(a, a)),
+      List.flatMap(list)(a => List(a, a)),
       scalaListToList(listToScalaList(list).flatMap(a => SList(a, a)))
     )
 
   test("List.filterViaFlatMap")(genIntList): list =>
     assertEquals(
-      List.filterViaFlatMap(list, _ % 2 == 0),
+      List.filterViaFlatMap(list)(_ % 2 == 0),
       scalaListToList(listToScalaList(list).filter(_ % 2 == 0))
     )
 

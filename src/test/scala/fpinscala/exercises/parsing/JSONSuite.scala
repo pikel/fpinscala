@@ -83,10 +83,10 @@ class JSONSuite extends PropSuite:
       Right(
         JObject(
           Map(
-            "Company name" -> JString("Microsoft Corporation"),
-            "Ticker" -> JString("MSFT"),
-            "Active" -> JBool(true),
-            "Price" -> JNumber(30.66),
+            "Company name"       -> JString("Microsoft Corporation"),
+            "Ticker"             -> JString("MSFT"),
+            "Active"             -> JBool(true),
+            "Price"              -> JNumber(30.66),
             "Shares outstanding" -> JNumber(8.38e9),
             "Related companies" -> JArray(
               IndexedSeq(JString("HPQ"), JString("IBM"), JString("YHOO"), JString("DELL"), JString("GOOG"))
@@ -129,9 +129,9 @@ class JSONSuite extends PropSuite:
       Right(
         JObject(
           Map(
-            "Book" -> JString("Functional Programming in Scala, Second Edition"),
+            "Book"   -> JString("Functional Programming in Scala, Second Edition"),
             "Active" -> JBool(true),
-            "Pages" -> JNumber(322),
+            "Pages"  -> JNumber(322),
             "Parts" -> JObject(
               Map(
                 "Part 1" -> JObject(

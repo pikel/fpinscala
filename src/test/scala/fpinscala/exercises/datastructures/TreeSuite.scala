@@ -63,7 +63,7 @@ object TreeSuite:
         if _ then g.map(n => Leaf(n))
         else
           for
-            left <- loop()
+            left  <- loop()
             right <- loop()
           yield Branch(left, right)
     loop()
